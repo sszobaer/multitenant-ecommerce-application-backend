@@ -7,6 +7,8 @@ import { LoginDto } from './DTOs/login.dto';
 import { DataSource } from 'typeorm';
 import { Tenant } from 'src/tenants/entities/tanent.entity';
 import { User } from 'src/users/entity/user.entity';
+import { AcceptInviteDto } from './DTOs/accept-invite.dto';
+import { Invitation } from 'src/invitations/entities/invitation.entity';
 
 @Injectable()
 export class AuthService {
@@ -76,5 +78,83 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
     };
   }
+
+  async acceptInvite(token: string, dto: AcceptInviteDto) {
+  const {name, password } = dto;
+
+  // 1. Find invitation
+  const invitation = await this.dataSource.manager.findOne(Invitation, {
+    where: { token },
+    relations: ['tenant'],
+  });
+
+  if (!invitation) {
+    throw new BadRequestException('Invalid invitation token');
+  }
+
+  // 2. Check status
+  if (invitation.status !== 'pending') {
+    throw new BadRequestException('Invitation already used or expired');
+  }
+
+  // 3. Check expiry
+  if (invitation.expiresAt && new Date() > invitation.expiresAt) {
+    invitation.status = 'expired';
+    await this.dataSource.manager.save(invitation);
+
+    throw new BadRequestException('Invitation has expired');
+  }
+
+  // 4. Check if user already exists
+  const existingUser = await this.dataSource.manager.findOne(User, {
+    where: { email: invitation.email },
+  });
+
+  if (existingUser) {
+    throw new BadRequestException('User already exists with this email');
+  }
+
+  // 5. Hash password
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // 6. Transaction (create user + update invitation)
+  const user = await this.dataSource.transaction(async (manager) => {
+    const newUser = manager.create(User, {
+      name,
+      email: invitation.email,
+      password: hashedPassword,
+      tenant: invitation.tenant,
+      role: 'user',
+    });
+
+    const savedUser = await manager.save(newUser);
+
+    invitation.status = 'accepted';
+    await manager.save(invitation);
+
+    return savedUser;
+  });
+
+  // 7. Create JWT
+  const payload = {
+    userId: user.id,
+    tenantId: user.tenant.id,
+    role: user.role,
+  };
+
+  const access_token = this.jwtService.sign(payload);
+
+  return {
+    message: 'Invitation accepted successfully',
+    access_token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      tenantId: user.tenant.id,
+    },
+  };
+}
 }
   

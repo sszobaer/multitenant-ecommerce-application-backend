@@ -10,7 +10,10 @@ export class Tenant {
   name!: string;
 
   @Column({ default: false })
-  isActive!: boolean
+  isActive!: boolean;
+
+  @Column({ unique: true, nullable: true })
+  inviteCode!: string;
 
   @OneToMany(() => User, user => user.tenant)
   users!: User[];
