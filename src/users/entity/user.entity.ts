@@ -1,10 +1,10 @@
 import { Tenant } from 'src/tenants/entities/tanent.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
   @Column()
   name!: string;
@@ -18,10 +18,13 @@ export class User {
   @Column({ default: 'user' })
   role!: string;
 
-  @ManyToOne(()=> Tenant, tenant => tenant.users)
-  @JoinColumn({name: 'tanent_id'})
+  @ManyToOne(() => Tenant, tenant => tenant.users)
+  @JoinColumn({ name: 'tanent_id' })
   tenant!: Tenant;
 
-  @Column()
-  tenant_id!: number;
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at!: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at!: Date;
 }
