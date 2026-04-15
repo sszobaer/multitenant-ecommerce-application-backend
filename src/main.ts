@@ -3,13 +3,20 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 import { ValidationPipe } from '@nestjs/common';
+import mongoose from 'mongoose';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  mongoose.connection.on('connected', () => {
+    console.log('✅ MongoDB connected');
+  });
 
+  mongoose.connection.on('error', (err) => {
+    console.log('❌ MongoDB error:', err);
+  });
   app.setGlobalPrefix('api');
 
-   app.useGlobalPipes(
+  app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,            //  remove extra fields
       forbidNonWhitelisted: true, //  throw error if extra fields sent

@@ -12,7 +12,7 @@ export class TenantService {
   ) { }
 
   async createTenant(data: CreateTenantDto) {
-    const exists = await this.tenantModel.findById({
+    const exists = await this.tenantModel.findOne({
       name: data.name
     });
 

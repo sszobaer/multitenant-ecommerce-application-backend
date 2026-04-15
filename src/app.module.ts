@@ -12,9 +12,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
-    
+
     ConfigModule.forRoot({ isGlobal: true }),
-    
+
     //PG SQL Conn
     // TypeOrmModule.forRootAsync({
     //   imports: [ConfigModule],
@@ -37,9 +37,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 
     //Mongo Conn
     MongooseModule.forRootAsync({
+      imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (ConfigService: ConfigService) => ({
-        uri: ConfigService.get<string>("MONGO_URI"),
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_URI'),
       }),
     }),
     TenantsModule,
@@ -51,4 +52,4 @@ import { MongooseModule } from '@nestjs/mongoose';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

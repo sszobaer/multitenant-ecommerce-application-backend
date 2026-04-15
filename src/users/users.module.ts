@@ -3,6 +3,7 @@ import { UsersService } from './users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schema/user.schema';
+import { UsersController } from './users.controller';
 
 
 @Module({
@@ -13,6 +14,7 @@ import { User, UserSchema } from './schema/user.schema';
       }])
     ],
   providers: [UsersService],
-  exports: [UsersService, MongooseModule]
+  exports: [UsersService, MongooseModule],
+  controllers: [UsersController]
 })
 export class UsersModule {}
