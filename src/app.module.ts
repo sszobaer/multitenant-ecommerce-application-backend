@@ -9,12 +9,17 @@ import { ProductsModule } from './products/products.module';
 import { AuthModule } from './auth/auth.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
-
     ConfigModule.forRoot({ isGlobal: true }),
 
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'secretKey',
+      signOptions: { expiresIn: '1d' },
+    }),
+    
     //PG SQL Conn
     // TypeOrmModule.forRootAsync({
     //   imports: [ConfigModule],
@@ -51,5 +56,6 @@ import { MongooseModule } from '@nestjs/mongoose';
   ],
   controllers: [AppController],
   providers: [AppService],
+  exports: [JwtModule]
 })
 export class AppModule { }

@@ -7,13 +7,6 @@ import mongoose from 'mongoose';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  mongoose.connection.on('connected', () => {
-    console.log('✅ MongoDB connected');
-  });
-
-  mongoose.connection.on('error', (err) => {
-    console.log('❌ MongoDB error:', err);
-  });
   app.setGlobalPrefix('api');
 
   app.useGlobalPipes(

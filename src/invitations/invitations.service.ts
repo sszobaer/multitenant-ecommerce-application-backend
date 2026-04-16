@@ -43,7 +43,7 @@ export class InvitationsService {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
 
-    const invitation = await this.invitationModel.create({
+    await this.invitationModel.create({
       email,
       token,
       status: 'pending',

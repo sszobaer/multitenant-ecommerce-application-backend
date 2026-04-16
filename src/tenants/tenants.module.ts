@@ -13,7 +13,7 @@ import { TenantController } from './tenants.controller';
     ])
   ],
   providers: [TenantService, MongooseModule],
-  exports: [TenantService],
+  exports: [TenantService, MongooseModule],
   controllers: [TenantController],
 })
 export class TenantsModule {}
