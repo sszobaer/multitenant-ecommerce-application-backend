@@ -11,10 +11,6 @@ import { InvitationsModule } from 'src/invitations/invitations.module';
     UsersModule,
     TenantsModule,
     InvitationsModule,
-    // JwtModule.register({
-    //   secret: process.env.JWT_SECRET || 'secretKey',
-    //   signOptions: { expiresIn: '1d' },
-    // })
   ],
   providers: [AuthService],
   controllers: [AuthController]
