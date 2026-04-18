@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schema/user.schema';
 import { UsersController } from './users.controller';
+import { RedisRateLimitGuard } from 'src/common/guards/redis-rate-limit.guard';
 
 
 @Module({
@@ -13,7 +14,7 @@ import { UsersController } from './users.controller';
         schema: UserSchema,
       }])
     ],
-  providers: [UsersService],
+  providers: [UsersService, RedisRateLimitGuard],
   exports: [UsersService, MongooseModule],
   controllers: [UsersController]
 })

@@ -1,4 +1,4 @@
-import { Global, Module } from '@nestjs/common';
+import { Global, Logger, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -52,12 +52,37 @@ import { redisStore } from 'cache-manager-redis-store';
     }),
 
     //Configure Redis
-    CacheModule.register({
-      store: redisStore,
-      host: 'localhost',
-      port: 6379,
-      ttl: 60,
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
       isGlobal: true,
+      useFactory: async (configService: ConfigService) => {
+        const logger = new Logger('CacheModule');
+        const redisHost = configService.get<string>('REDIS_HOST') || '127.0.0.1';
+        const redisPort = Number(configService.get<number>('REDIS_PORT') || 6379);
+
+        try {
+          return {
+            stores: [
+              await redisStore({
+                socket: {
+                  host: redisHost,
+                  port: redisPort,
+                },
+              }),
+            ],
+            ttl: 60 * 1000,
+          };
+        } catch (error) {
+          logger.warn(
+            `Redis unavailable at ${redisHost}:${redisPort}. Falling back to in-memory cache.`,
+          );
+
+          return {
+            ttl: 60 * 1000,
+          };
+        }
+      },
     }),
 
     TenantsModule,
